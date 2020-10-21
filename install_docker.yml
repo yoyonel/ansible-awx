@@ -1,33 +1,84 @@
 ---
 - hosts: all
   become: true
+  environment:
+    LC_ALL: en_US.UTF-8
+  vars:
+    # https://github.com/nickjj/ansible-docker#default-role-variables
+    docker__compose_version: ""
+    docker__users: ["vagrant"]
+  
   tasks:
 
-    - name: add docker engine repo key
-      apt_key:
-        keyserver: p80.pool.sks-keyservers.net
-        id: 58118E89F3A912897C070ADBF76221572C52609D
-        state: present
+    # - name: "Working around Ansible lameness..."
+    #   apt:
+    #     pkg: "{{ item }}"
+    #     state: latest
+    #     update_cache: yes
+    #     cache_valid_time: 3600
+    #   with_items:
+    #     - aptitude
 
-    - name: add docker engine repo
-      apt_repository:
-        repo: deb https://apt.dockerproject.org/repo ubuntu-xenial main
-        state: present
-        filename: docker
-        update_cache: yes
+    # - name: "Upgrade existing packages"
+    #   apt: 
+    #     update_cache: yes 
+    #     upgrade: yes 
+      
+    # - name: add docker engine repo key
+    #   apt_key:
+    #     keyserver: p80.pool.sks-keyservers.net
+    #     id: 58118E89F3A912897C070ADBF76221572C52609D
+    #     state: present
 
-    - name: install docker-engine
-      apt:
-        name: docker-engine
-        state: present
-        update_cache: yes
+    # - name: add docker engine repo
+    #   apt_repository:
+    #     repo: deb [arch=amd64] https://apt.dockerproject.org/repo/ ubuntu-xenial main
+    #     state: present
+    #     filename: docker
+    #     update_cache: no
 
-    - name: install python-pip
-      apt:
-        name: python-pip
-        state: present
-        update_cache: yes
+    # - name: install docker-ce
+    #   apt:
+    #     name: docker-ce
+    #     state: present
+    #     update_cache: yes
 
-    - name: install docker-py
-      pip:
-        name: docker-py
+    # - name: install python-pip
+    #   apt:
+    #     name: python-pip
+    #     state: present
+    #     update_cache: yes
+
+    # - name: install docker-py
+    #   pip:
+    #     name: docker-py
+  
+    - name: role - execute dependency installation
+      include_role:
+        name: "{{ role_to_run }}"
+        public: yes
+      loop:
+        - nickjj.docker
+        - markosamuli.pyenv
+      loop_control:
+        loop_var: role_to_run
+
+    # - name: install python-pip
+    #   apt:
+    #     name: python-pip
+    #     state: present
+    #     update_cache: yes
+
+    # - name: install docker-py
+    #   pip:
+    #     name: docker-py
+    #     state: absent
+
+    # - name: install docker python module
+    #   pip:
+    #     name: docker
+    #     state: present
+
+    # - name: install docker-compose
+    #   pip:
+    #     name: docker-compose

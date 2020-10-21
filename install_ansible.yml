@@ -4,12 +4,30 @@
   become_method: sudo
   tasks:
 
-  - name: add ansible ppa
-    apt_repository:
-      repo: 'ppa:ansible/ansible'
-
-  - name: apt-get update && install ansible
+  # https://blog.sleeplessbeastie.eu/2017/11/02/how-to-fix-missing-dirmngr/
+  - name: install dirmngr
     apt:
+      name: dirmngr
+      state: present
       update_cache: yes
+
+  # https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-on-debian
+  - name: add ansible repo key
+    apt_key:
+      keyserver: keyserver.ubuntu.com
+      id: 93C4A3FD7BB9C367
+      state: present
+
+  - name: add ansible repo
+    apt_repository:
+      repo: deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
+      state: present
+      filename: ansible
+      update_cache: no
+  
+  - name: install ansible
+    apt:
       name: ansible
       state: present
+      update_cache: yes
+  
